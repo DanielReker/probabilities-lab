@@ -19,6 +19,12 @@ Type factorial(Type n) {
 }
 
 
+template<class Type>
+Type binomialCoefficient(Type n, Type k) {
+	return factorial(n) / (factorial(k) * factorial(n - k));
+}
+
+
 
 template<class Type>
 inline Type phi(Type x) {

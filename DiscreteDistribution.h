@@ -84,7 +84,7 @@ public:
 		static const int64_t width = 7;
 		static const int64_t outputPrecision = 2;
 
-		ostream << std::setw(width) << "Val" << std::setw(width) << "Prob";
+		ostream << std::setw(width) << "Val" << std::setw(width + 10) << "Prob";
 		for (int64_t precision = 0; precision <= maxPrecision; precision++) {
 			ostream << std::setw(width) << std::format("{} dec", precision);
 		}
@@ -94,7 +94,7 @@ public:
 			//FloatType mean = experiments * exactProbability;
 			//FloatType standardDeviation = std::sqrt(experiments * exactProbability * (1 - exactProbability));
 
-			ostream << std::setw(width) << value << std::setw(width) << std::setprecision(outputPrecision) << exactProbability;
+			ostream << std::setw(width) << value << std::setw(width + 10) << std::setprecision(outputPrecision + 10) << exactProbability;
 
 			for (int64_t precision = 0; precision <= maxPrecision; precision++) {
 				//FloatType maxDelta = 0.5 * std::pow(10, std::ceil(std::log10(exactProbability)) - precision);
