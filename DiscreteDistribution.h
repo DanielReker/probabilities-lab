@@ -76,6 +76,13 @@ public:
 		}
 	}
 
+	void saveInfoToFile(const std::string& fileName) {
+		std::ofstream file(fileName);
+
+		for (const auto& [probability, value] : m_cumulativeProbabilityFunction) {
+			file << value << ' ' << m_probabilityFunction[value] << '\n';
+		}
+	}
 
 
 

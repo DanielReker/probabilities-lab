@@ -22,7 +22,6 @@ using IntType = int64_t;
 
 
 unsigned int seed;
-FloatType precision;
 IntType experiments, N, M, n;
 
 
@@ -93,6 +92,13 @@ void printSampleInfo (const std::map<IntType, IntType>& sample) {
 	matplot::save(std::format("img/hypergeometric_exps{}_N{}_M_{}_n{}_seed{}/relative.pdf", experiments, N, M, n, seed));
 }
 
+void saveSampleToFile(const std::map<IntType, IntType>& sample, const std::string& fileName) {
+	std::ofstream file(fileName);
+	for (const auto& [key, value] : sample) {
+		file << key << ' ' << value << '\n';
+	}
+}
+
 
 int main()
 {
@@ -103,7 +109,7 @@ int main()
 	
 	config >> N >> M >> n >> seed;
 	if (seed == 0) seed = std::random_device{}();
-	ostream << std::format("N = {}\nM = {}\nn = {}\nseed = {}\n", precision, N, M, n, seed);
+	ostream << std::format("N = {}\nM = {}\nn = {}\nseed = {}\n", N, M, n, seed);
 
 
 	ostream << "number of experiments = ";
@@ -127,6 +133,7 @@ int main()
 	}
 
 	printSampleInfo(sample);
-
+	saveSampleToFile(sample, std::format("samples/hypergeometric_exps{}_N{}_M{}_n{}_seed{}.txt", experiments, N, M, n, seed));
+	distribution.saveInfoToFile(std::format("distributions/hypergeometric_N{}_M{}_n{}.txt", N, M, n));
 	return 0;
 }
