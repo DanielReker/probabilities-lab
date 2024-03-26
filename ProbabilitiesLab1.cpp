@@ -22,17 +22,12 @@ using IntType = int64_t;
 
 
 unsigned int seed;
-FloatType precision, lambda;
-IntType experiments;
+FloatType precision;
+IntType experiments, N, M, n;
 
 
-
-FloatType poissonDistributionPMF(IntType value, FloatType lambda) {
-	return std::pow(lambda, value) * std::exp(-lambda) / factorial<FloatType>(value);
-}
-
-FloatType hypergeometricDistributionPMF(IntType value, IntType N, IntType M, IntType n) {
-	return binomialCoefficient(value, M) * binomialCoefficient(n - value, N - M) / binomialCoefficient(n, N);
+FloatType hypergeometricDistributionPMF(FloatType value, FloatType N, FloatType M, FloatType n) {
+	return binomialCoefficient(M, value) * binomialCoefficient(N - M, n - value) / binomialCoefficient(N, n);
 }
 
 
@@ -75,11 +70,11 @@ void printSampleInfo (const std::map<IntType, IntType>& sample) {
 
 	matplot::ylim({ 0, 1.3 * *std::max_element(counts.begin(), counts.end()) });
 	auto absoluteBar = matplot::bar(values, counts);
-	matplot::title(std::format("{} experiments, lambda = {}", experiments, lambda, seed));
-	addBarLabels<IntType>(absoluteBar, values, counts, 7, false);
+	matplot::title(std::format("{} experiments, N = {}, M = {}, n = {}", experiments, N, M, n));
+	addBarLabels<IntType>(absoluteBar, values, counts, 6, false);
 
 	matplot::show();
-	matplot::save(std::format("img/poisson_exps{}_lambda{}_seed{}/absolute.pdf", experiments, lambda, seed));
+	matplot::save(std::format("img/hypergeometric_exps{}_N{}_M_{}_n{}_seed{}/absolute.pdf", experiments, N, M, n, seed));
 
 
 	for (auto& count : counts) {
@@ -90,12 +85,12 @@ void printSampleInfo (const std::map<IntType, IntType>& sample) {
 
 	matplot::ylim({ 0, 1.3 * *std::max_element(counts.begin(), counts.end()) });
 	matplot::bar(values, counts);
-	matplot::title(std::format("{} experiments, lambda = {}", experiments, lambda, seed));
+	matplot::title(std::format("{} experiments, N = {}, M = {}, n = {}", experiments, N, M, n));
 	addBarLabels<double>(absoluteBar, values, counts, 7, true);
 
 
 	matplot::show();
-	matplot::save(std::format("img/poisson_exps{}_lambda{}_seed{}/relative.pdf", experiments, lambda, seed));
+	matplot::save(std::format("img/hypergeometric_exps{}_N{}_M_{}_n{}_seed{}/relative.pdf", experiments, N, M, n, seed));
 }
 
 
@@ -103,36 +98,35 @@ int main()
 {
 	std::ifstream config("config.txt");
 
-	ostream << "Poisson distribution\n";
+	ostream << "Hypergeometric distribution\n";
 
 	
-	config >> precision >> lambda >> seed;
+	config >> N >> M >> n >> seed;
 	if (seed == 0) seed = std::random_device{}();
-	ostream << std::format("precision = {}\nlambda = {}\nseed = {}\n", precision, lambda, seed);
+	ostream << std::format("N = {}\nM = {}\nn = {}\nseed = {}\n", precision, N, M, n, seed);
 
 
 	ostream << "number of experiments = ";
 	std::cin >> experiments;
 
 
-	auto poissonDistributionRange = std::views::iota(0) |
-		std::views::transform([&](IntType val) { return std::pair(val, poissonDistributionPMF(val, lambda)); });
+	IntType minm = std::max(static_cast<IntType>(0), M - N + n), maxm = std::min(M, n);
+	auto distributionValuesProbabilities = std::views::iota(minm, maxm + 1) |
+		std::views::transform([&](IntType val) { return std::pair(val, hypergeometricDistributionPMF(val, N, M, n)); });
 
-	DiscreteDistributuion<IntType, FloatType> poissonDist(poissonDistributionRange, seed, precision);
+	DiscreteDistributuion<IntType, FloatType> distribution(distributionValuesProbabilities, seed);
+
+
 
 	ostream << '\n';
-	poissonDist.printInfo();
-	//poissonDist.printPrecisionDistribution(experiments, 5);
+	distribution.printInfo();
 
-
-	std::map<IntType, IntType> histogram;
-
-
+	std::map<IntType, IntType> sample;
 	for (IntType i = 0; i < experiments; i++) {
-		histogram[poissonDist.generateValue()]++;
+		sample[distribution.generateValue()]++;
 	}
 
-	
+	printSampleInfo(sample);
 
 	return 0;
 }

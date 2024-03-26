@@ -35,8 +35,8 @@ private:
 
 
 public:
-	template<class ProbabilityDensity>
-	DiscreteDistributuion(const ProbabilityDensity& probabilityDensity, unsigned int seed,
+	template<class ValuesProbabilities>
+	DiscreteDistributuion(const ValuesProbabilities& probabilityDensity, unsigned int seed,
 		FloatType precision = std::numeric_limits<FloatType>::quiet_NaN()) :
 		m_uniformDistribution{ 0, 1 }, m_randomGenerator{ seed } {
 
